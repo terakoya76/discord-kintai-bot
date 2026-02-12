@@ -1,0 +1,7 @@
+[tools]
+node = "24"
+"npm:pnpm" = "10"
+
+[env]
+# This will make CLIs installed with npm available without npx.
+_.path = ["{{config_root}}/node_modules/.bin"]

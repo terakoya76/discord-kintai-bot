@@ -1,0 +1,16 @@
+[Unit]
+Description=manage discord-kintai-bot
+Documentation=https://github.com/terakoya76/discord-kintai-bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+ExecStart=/home/ubuntu/discord-kintai-bot/start.sh
+Restart=always
+KillSignal=SIGINT
+Environment=DISCORD_BOT_TOKEN=xxx
+
+[Install]
+WantedBy=multi-user.target

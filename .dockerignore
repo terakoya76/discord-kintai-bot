@@ -1,0 +1,7 @@
+*
+
+!src
+!main.ts
+!package.json
+!pnpm-lock.yaml
+!tsconfig.json

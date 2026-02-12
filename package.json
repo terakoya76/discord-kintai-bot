@@ -1,0 +1,30 @@
+{
+  "name": "discord-kintai-bot",
+  "description": "",
+  "scripts": {
+    "lint": "gts lint",
+    "clean": "gts clean",
+    "compile": "tsc",
+    "fix": "gts fix",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage",
+    "prepare": "pnpm run compile",
+    "pretest": "pnpm run compile",
+    "posttest": "pnpm run lint"
+  },
+  "dependencies": {
+    "discord.js": "^14.25.1",
+    "googleapis": "^171.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.3",
+    "coveralls": "^3.1.1",
+    "gts": "^7.0.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  },
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": "24.x"
+  }
+}
