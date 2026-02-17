@@ -49,11 +49,23 @@ interface BreakTimeRecord {
   endTime?: Date;
 }
 
+/**
+ * Type guard to check if a date is valid (not undefined and not Invalid Date).
+ * This handles the case where new Date(undefined) or new Date(null) creates Invalid Date.
+ */
+function isValidDate(d: Date | undefined): d is Date {
+  return d instanceof Date && !isNaN(d.getTime());
+}
+
 export function deriveState(row: Omit<SheetRow, 'state'>): WorkState {
-  if (row.endTime) return 'completed';
+  if (isValidDate(row.endTime)) return 'completed';
 
   const lastRecord = row.breakTimeRecords[row.breakTimeRecords.length - 1];
-  if (lastRecord && lastRecord.startTime && !lastRecord.endTime) {
+  if (
+    lastRecord &&
+    isValidDate(lastRecord.startTime) &&
+    !isValidDate(lastRecord.endTime)
+  ) {
     return 'break';
   }
 
@@ -105,12 +117,10 @@ export async function getSheetData(sheetId: string, sheetName: string) {
         : undefined,
       breakTimeRecords: JSON.parse(
         row[headers.indexOf('breakTimeRecords')],
-      ).map(btr => {
-        return {
-          startTime: new Date(btr['startTime']),
-          endTime: new Date(btr['endTime']),
-        };
-      }),
+      ).map((btr: {startTime?: string; endTime?: string}) => ({
+        startTime: btr.startTime ? new Date(btr.startTime) : undefined,
+        endTime: btr.endTime ? new Date(btr.endTime) : undefined,
+      })),
       breakTime: row[headers.indexOf('breakTime')],
       workingTime: row[headers.indexOf('workingTime')],
     };
@@ -154,7 +164,7 @@ export async function updateSheetData(
 
 function calcSheetRow(row: SheetRow): SheetRow {
   const breakTime = row['breakTimeRecords'].reduce((acc, curr) => {
-    if (!curr['startTime'] || !curr['endTime']) return acc;
+    if (!isValidDate(curr.startTime) || !isValidDate(curr.endTime)) return acc;
 
     const duration =
       Math.abs(curr['endTime'].valueOf() - curr['startTime'].valueOf()) /
@@ -163,7 +173,7 @@ function calcSheetRow(row: SheetRow): SheetRow {
     return acc + duration;
   }, 0);
 
-  if (!row['startTime'] || !row['endTime']) {
+  if (!isValidDate(row.startTime) || !isValidDate(row.endTime)) {
     const result = {...row, breakTime};
     return {...result, state: deriveState(result)};
   }
@@ -230,15 +240,22 @@ export function endWorkRow(row: SheetRow): SheetRow {
   // Deep clone breakTimeRecords to avoid mutating the original
   const breakRecords = ret.breakTimeRecords.map(record => ({...record}));
 
-  // Close any open break time record
-  if (breakRecords.length > 0) {
-    const lastRecord = breakRecords[breakRecords.length - 1];
-    if (lastRecord.startTime && !lastRecord.endTime) {
-      lastRecord.endTime = now;
-    }
-  }
+  // Process break records:
+  // 1. Filter out records with invalid startTime
+  // 2. Close open break records (endTime undefined) by setting endTime = now
+  // 3. Filter out records with corrupted endTime (Invalid Date objects)
+  const processedBreakRecords = breakRecords
+    .filter(record => isValidDate(record.startTime))
+    .map(record => {
+      // If endTime is undefined (open break), close it with session end time
+      if (record.endTime === undefined) {
+        return {...record, endTime: now};
+      }
+      return record;
+    })
+    .filter(record => isValidDate(record.endTime));
 
-  ret.breakTimeRecords = breakRecords;
+  ret.breakTimeRecords = processedBreakRecords;
   ret.endTime = now;
   ret.state = 'completed';
   return calcSheetRow(ret);

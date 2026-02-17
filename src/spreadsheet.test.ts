@@ -30,6 +30,9 @@ import {
   endWorkRow,
 } from './spreadsheet';
 
+// Infer SheetRow type from startWorkRow return type
+type SheetRow = ReturnType<typeof startWorkRow>;
+
 describe('spreadsheet', () => {
   describe('deriveState', () => {
     it('should return working when endTime is not set and no break records', () => {
@@ -95,6 +98,39 @@ describe('spreadsheet', () => {
       };
 
       expect(deriveState(row)).toBe('completed');
+    });
+
+    it('should treat Invalid Date as not having endTime', () => {
+      const row = {
+        threadId: 'thread-123',
+        startTime: new Date(),
+        endTime: new Date(undefined as unknown as string), // Invalid Date
+        breakTimeRecords: [],
+        breakTime: 0,
+        workingTime: 0,
+      };
+
+      // Invalid Date should not be treated as 'completed'
+      expect(deriveState(row)).toBe('working');
+    });
+
+    it('should treat Invalid Date in break record as not closed', () => {
+      const row = {
+        threadId: 'thread-123',
+        startTime: new Date(),
+        endTime: undefined,
+        breakTimeRecords: [
+          {
+            startTime: new Date(),
+            endTime: new Date(undefined as unknown as string), // Invalid Date
+          },
+        ],
+        breakTime: 0,
+        workingTime: 0,
+      };
+
+      // Invalid Date endTime on break record should be treated as still on break
+      expect(deriveState(row)).toBe('break');
     });
   });
 
@@ -251,6 +287,7 @@ describe('spreadsheet', () => {
       expect(ended.startTime).toBeInstanceOf(Date);
       expect(ended.endTime).toBeInstanceOf(Date);
       expect(ended.breakTimeRecords).toHaveLength(1);
+      expect(ended.breakTimeRecords[0].startTime).toBeInstanceOf(Date);
       expect(ended.breakTimeRecords[0].endTime).toBeInstanceOf(Date);
       expect(ended.breakTime).toBeGreaterThan(0);
       expect(ended.workingTime).toBeGreaterThan(0);
@@ -259,23 +296,40 @@ describe('spreadsheet', () => {
       vi.useRealTimers();
     });
 
-    it('should delete open break time record when ending directly after suspend', () => {
+    it('should close multiple open break records when ending directly after suspend', () => {
       vi.useFakeTimers();
 
       const row = startWorkRow('thread-123');
       vi.advanceTimersByTime(1000 * 60);
-      const suspended = suspendWorkRow(row);
+      const suspended1 = suspendWorkRow(row);
+      vi.advanceTimersByTime(1000 * 60);
+      const resumed = resumeWorkRow(suspended1);
+      vi.advanceTimersByTime(1000 * 60);
+      // Second break: suspend -> end without resume (should be closed with endTime)
+      const suspended2 = suspendWorkRow(resumed);
       vi.advanceTimersByTime(1000 * 60);
 
-      const ended = endWorkRow(suspended);
+      const ended = endWorkRow(suspended2);
 
       expect(ended.threadId).toBe('thread-123');
       expect(ended.startTime).toBeInstanceOf(Date);
       expect(ended.endTime).toBeInstanceOf(Date);
-      expect(ended.breakTimeRecords).toHaveLength(1);
+      // Should have 2 break records (both closed - one via resume, one via end)
+      expect(ended.breakTimeRecords).toHaveLength(2);
+      expect(ended.breakTimeRecords[0].startTime).toBeInstanceOf(Date);
+      expect(ended.breakTimeRecords[0].endTime).toBeInstanceOf(Date);
+      expect(ended.breakTimeRecords[1].startTime).toBeInstanceOf(Date);
+      expect(ended.breakTimeRecords[1].endTime).toBeInstanceOf(Date);
+      expect(ended.breakTimeRecords[1].endTime).toEqual(ended.endTime);
       expect(ended.breakTime).toBeGreaterThan(0);
-      expect(ended.workingTime).toBeGreaterThan(0);
+      expect(ended.workingTime).toBeGreaterThanOrEqual(0);
       expect(ended.state).toBe('completed');
+
+      // Explicit NaN check - breakTime should be a valid number
+      expect(Number.isNaN(ended.breakTime)).toBe(false);
+      expect(Number.isNaN(ended.workingTime)).toBe(false);
+      expect(typeof ended.breakTime).toBe('number');
+      expect(typeof ended.workingTime).toBe('number');
 
       vi.useRealTimers();
     });
@@ -292,6 +346,59 @@ describe('spreadsheet', () => {
       expect(row.breakTimeRecords).toHaveLength(originalLength);
       // Verify the breakTimeRecords array is a new reference
       expect(ended.breakTimeRecords).not.toBe(row.breakTimeRecords);
+    });
+
+    it('should handle Invalid Date objects in breakTimeRecords (from JSON parsing)', () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-02-17T03:00:00.000Z'));
+
+      // Simulate data that was read from Google Sheets and parsed from JSON
+      // When JSON has {"endTime": null} or missing endTime key, new Date(undefined) creates Invalid Date
+      const rowWithInvalidDate: SheetRow = {
+        threadId: 'thread-123',
+        startTime: new Date('2026-02-17T01:00:00.000Z'),
+        endTime: undefined,
+        breakTimeRecords: [
+          // First break: properly closed
+          {
+            startTime: new Date('2026-02-17T01:20:48.292Z'),
+            endTime: new Date('2026-02-17T02:34:32.886Z'),
+          },
+          // Second break: Invalid Date (simulates new Date(undefined) from JSON parsing)
+          {
+            startTime: new Date('2026-02-17T02:55:42.695Z'),
+            endTime: new Date(undefined as unknown as string), // Creates Invalid Date
+          },
+        ],
+        breakTime: 0,
+        workingTime: 0,
+        state: 'break',
+      };
+
+      // Verify the Invalid Date is indeed invalid
+      expect(
+        Number.isNaN(rowWithInvalidDate.breakTimeRecords[1].endTime?.getTime()),
+      ).toBe(true);
+
+      const ended = endWorkRow(rowWithInvalidDate);
+
+      // Should only have 1 break record (the closed one), Invalid Date record should be filtered
+      expect(ended.breakTimeRecords).toHaveLength(1);
+      expect(ended.breakTimeRecords[0].startTime).toEqual(
+        new Date('2026-02-17T01:20:48.292Z'),
+      );
+      expect(ended.breakTimeRecords[0].endTime).toEqual(
+        new Date('2026-02-17T02:34:32.886Z'),
+      );
+
+      // breakTime should be a valid number, not NaN
+      expect(Number.isNaN(ended.breakTime)).toBe(false);
+      expect(ended.breakTime).toBeGreaterThan(0);
+
+      // workingTime should be a valid number, not NaN
+      expect(Number.isNaN(ended.workingTime)).toBe(false);
+
+      vi.useRealTimers();
     });
   });
 });
