@@ -1,5 +1,5 @@
+import * as fs from 'node:fs';
 import {google} from 'googleapis';
-import * as fs from 'fs';
 
 const defaultGoogleServiceAccountCredentialsPath =
   '/etc/discord-kintai-bot/google_service_account_credentials.json';
@@ -54,7 +54,7 @@ interface BreakTimeRecord {
  * This handles the case where new Date(undefined) or new Date(null) creates Invalid Date.
  */
 function isValidDate(d: Date | undefined): d is Date {
-  return d instanceof Date && !isNaN(d.getTime());
+  return d instanceof Date && !Number.isNaN(d.getTime());
 }
 
 export function deriveState(row: Omit<SheetRow, 'state'>): WorkState {
@@ -73,7 +73,7 @@ export function deriveState(row: Omit<SheetRow, 'state'>): WorkState {
 }
 
 export function lookupSheetId(org: string): string {
-  return orgToSheetId[org]['sheetId'];
+  return orgToSheetId[org].sheetId;
 }
 
 export function getTodayStr(dd: Date): string {
@@ -163,13 +163,11 @@ export async function updateSheetData(
 }
 
 function calcSheetRow(row: SheetRow): SheetRow {
-  const breakTime = row['breakTimeRecords'].reduce((acc, curr) => {
+  const breakTime = row.breakTimeRecords.reduce((acc, curr) => {
     if (!isValidDate(curr.startTime) || !isValidDate(curr.endTime)) return acc;
 
     const duration =
-      Math.abs(curr['endTime'].valueOf() - curr['startTime'].valueOf()) /
-      1000 /
-      60; // in-minute
+      Math.abs(curr.endTime.valueOf() - curr.startTime.valueOf()) / 1000 / 60; // in-minute
     return acc + duration;
   }, 0);
 
@@ -179,7 +177,7 @@ function calcSheetRow(row: SheetRow): SheetRow {
   }
 
   const total =
-    Math.abs(row['endTime'].valueOf() - row['startTime'].valueOf()) / 1000 / 60; // in-minute
+    Math.abs(row.endTime.valueOf() - row.startTime.valueOf()) / 1000 / 60; // in-minute
   const workingTime = total - breakTime;
 
   const result = {...row, breakTime, workingTime};

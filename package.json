@@ -2,10 +2,10 @@
   "name": "discord-kintai-bot",
   "description": "",
   "scripts": {
-    "lint": "gts lint",
-    "clean": "gts clean",
+    "lint": "biome check",
+    "clean": "rm -rf build",
     "compile": "tsc",
-    "fix": "gts fix",
+    "fix": "biome check --write",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
     "prepare": "pnpm run compile",
@@ -17,10 +17,10 @@
     "googleapis": "^171.4.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.4.15",
     "@types/node": "^25.3.3",
     "@vitest/coverage-v8": "^4.0.18",
     "coveralls": "^3.1.1",
-    "gts": "^7.0.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
   },
