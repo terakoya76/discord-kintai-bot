@@ -1,5 +1,5 @@
-import * as SpreadSheet from './spreadsheet';
 import * as Discord from './discord';
+import * as SpreadSheet from './spreadsheet';
 
 export async function start(message: Discord.Message, dd: Date) {
   const today = SpreadSheet.getTodayStr(dd);

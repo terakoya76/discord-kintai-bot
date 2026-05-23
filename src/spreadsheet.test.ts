@@ -1,4 +1,4 @@
-import {describe, it, expect, vi} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
 
 // Mock fs module before importing spreadsheet
 vi.mock('fs', () => ({
@@ -13,9 +13,7 @@ vi.mock('fs', () => ({
 vi.mock('googleapis', () => ({
   google: {
     auth: {
-      GoogleAuth: class MockGoogleAuth {
-        constructor() {}
-      },
+      GoogleAuth: class MockGoogleAuth {},
     },
     sheets: () => ({}),
   },
@@ -24,10 +22,10 @@ vi.mock('googleapis', () => ({
 // Import after mocks are set up
 import {
   deriveState,
+  endWorkRow,
+  resumeWorkRow,
   startWorkRow,
   suspendWorkRow,
-  resumeWorkRow,
-  endWorkRow,
 } from './spreadsheet';
 
 // Infer SheetRow type from startWorkRow return type
