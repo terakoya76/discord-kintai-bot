@@ -1,20 +1,24 @@
 {
-  "extends": "./node_modules/gts/tsconfig-google.json",
   "compilerOptions": {
-    "lib": [
-      "es2018",
-      "dom"
-    ],
-    "noImplicitAny": false,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "composite": true,
+    "forceConsistentCasingInFileNames": true,
+    "lib": ["es2018", "dom"],
     "module": "esnext",
     "moduleResolution": "bundler",
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": false,
+    "noImplicitReturns": true,
     "outDir": "build",
+    "pretty": true,
     "rootDir": ".",
+    "sourceMap": true,
+    "strict": true,
+    "stripInternal": true,
     "target": "esnext"
   },
-  "include": [
-    "main.ts",
-    "src/*.ts",
-    "vitest.config.ts"
-  ]
+  "include": ["main.ts", "src/*.ts", "vitest.config.ts"],
+  "exclude": ["node_modules"]
 }
