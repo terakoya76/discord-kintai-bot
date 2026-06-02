@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "discord.js": "^14.25.1",
-    "googleapis": "^171.4.0"
+    "googleapis": "^173.0.0"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.16",
