@@ -17,7 +17,7 @@
     "googleapis": "^173.0.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.16",
+    "@biomejs/biome": "2.5.14",
     "@types/node": "^25.9.1",
     "@vitest/coverage-v8": "^4.1.8",
     "coveralls": "^3.1.1",
