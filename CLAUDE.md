@@ -69,19 +69,19 @@ interface SheetRow {
   startTime?: Date;
   endTime?: Date;
   breakTimeRecords: BreakTimeRecord[];
-  breakTime: number;      // Total break time in minutes
-  workingTime: number;    // Working time in minutes
+  breakTime: number; // Total break time in minutes
+  workingTime: number; // Working time in minutes
   state: WorkState;
 }
 ```
 
 ## Environment Variables
 
-| Variable | Required | Default |
-|----------|----------|---------|
-| `DISCORD_BOT_TOKEN` | Yes | - |
-| `GOOGLE_SERVICE_ACCOUNT_CREDENTIALS_PATH` | No | `/etc/discord-kintai-bot/google_service_account_credentials.json` |
-| `ORG_TO_SHEET_ID_CONF_PATH` | No | `/etc/discord-kintai-bot/org_to_sheet_id.json` |
+| Variable                                  | Required | Default                                                           |
+| ----------------------------------------- | -------- | ----------------------------------------------------------------- |
+| `DISCORD_BOT_TOKEN`                       | Yes      | -                                                                 |
+| `GOOGLE_SERVICE_ACCOUNT_CREDENTIALS_PATH` | No       | `/etc/discord-kintai-bot/google_service_account_credentials.json` |
+| `ORG_TO_SHEET_ID_CONF_PATH`               | No       | `/etc/discord-kintai-bot/org_to_sheet_id.json`                    |
 
 ## Testing
 

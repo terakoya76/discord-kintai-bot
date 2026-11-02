@@ -2,7 +2,7 @@ name: action-lint
 on:
   push:
     paths:
-      - '.github/workflows/**'
+      - ".github/workflows/**"
 
 jobs:
   action-lint:

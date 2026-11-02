@@ -4,12 +4,12 @@
 
 The following is a list of commands supported by kintai-bot, which only work on the text channel named `<org-name>-kintai` or `<org-name>`
 
-| Command | Description |
-|---------|-------------|
-| `!start` | Starts recording attendance records and creates a discord thread for control |
-| `!suspend` | Change work status to resting |
-| `!resume` | Change work status to working |
-| `!end` | Stops recording attendance records and calculate a daily summary |
+| Command    | Description                                                                  |
+| ---------- | ---------------------------------------------------------------------------- |
+| `!start`   | Starts recording attendance records and creates a discord thread for control |
+| `!suspend` | Change work status to resting                                                |
+| `!resume`  | Change work status to working                                                |
+| `!end`     | Stops recording attendance records and calculate a daily summary             |
 
 ## State Machine
 
@@ -32,29 +32,29 @@ stateDiagram-v2
     ENDED --> [*]
 ```
 
-| State | Condition | Description |
-|-------|-----------|-------------|
-| IDLE | No SheetRow for today | Initial state, no work record exists |
-| WORKING | `startTime` set, no open break | Actively working |
-| ON_BREAK | Last `breakTimeRecord` has no `endTime` | Taking a break |
-| ENDED | `endTime` set | Work session completed |
+| State    | Condition                               | Description                          |
+| -------- | --------------------------------------- | ------------------------------------ |
+| IDLE     | No SheetRow for today                   | Initial state, no work record exists |
+| WORKING  | `startTime` set, no open break          | Actively working                     |
+| ON_BREAK | Last `breakTimeRecord` has no `endTime` | Taking a break                       |
+| ENDED    | `endTime` set                           | Work session completed               |
 
 ## Requirements
 
 ### Environment Variables
 
-| Variable | Required | Default |
-|----------|----------|---------|
-| `DISCORD_BOT_TOKEN` | Yes | - |
-| `GOOGLE_SERVICE_ACCOUNT_CREDENTIALS_PATH` | No | `/etc/discord-kintai-bot/google_service_account_credentials.json` |
-| `ORG_TO_SHEET_ID_CONF_PATH` | No | `/etc/discord-kintai-bot/org_to_sheet_id.json` |
+| Variable                                  | Required | Default                                                           |
+| ----------------------------------------- | -------- | ----------------------------------------------------------------- |
+| `DISCORD_BOT_TOKEN`                       | Yes      | -                                                                 |
+| `GOOGLE_SERVICE_ACCOUNT_CREDENTIALS_PATH` | No       | `/etc/discord-kintai-bot/google_service_account_credentials.json` |
+| `ORG_TO_SHEET_ID_CONF_PATH`               | No       | `/etc/discord-kintai-bot/org_to_sheet_id.json`                    |
 
 ### Config File
 
-| File | Description |
-|------|-------------|
-| `google_service_account_credentials.json` | Service account credentials for accessing Google Spreadsheet |
-| `org_to_sheet_id.json` | Mapping discord channel name (org name) to Google Spreadsheet id. Channel name must be `<org-name>-kintai` or `<org>` |
+| File                                      | Description                                                                                                           |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `google_service_account_credentials.json` | Service account credentials for accessing Google Spreadsheet                                                          |
+| `org_to_sheet_id.json`                    | Mapping discord channel name (org name) to Google Spreadsheet id. Channel name must be `<org-name>-kintai` or `<org>` |
 
 ## Systemd
 
