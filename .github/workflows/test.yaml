@@ -11,32 +11,32 @@ jobs:
     name: all
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
 
-    - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@v6
 
-    - uses: actions/setup-node@v7
-      with:
-        node-version: "24.x"
-        cache: 'pnpm'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24.x"
+          cache: "pnpm"
 
-    - name: download dependencies
-      run: pnpm install --frozen-lockfile
+      - name: download dependencies
+        run: pnpm install --frozen-lockfile
 
-    - name: lint
-      run: pnpm lint
+      - name: lint
+        run: pnpm lint
 
-    - name: test
-      run: pnpm test
+      - name: test
+        run: pnpm test
 
-    - name: coverage
-      run: pnpm coverage
+      - name: coverage
+        run: pnpm coverage
 
-    - name: Coveralls
-      uses: coverallsapp/github-action@master
-      with:
-        github-token: ${{ secrets.github_token }}
-        path-to-lcov: coverage/lcov.info
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.github_token }}
+          path-to-lcov: coverage/lcov.info
 
   dependabot:
     runs-on: ubuntu-latest
@@ -50,7 +50,7 @@ jobs:
         id: metadata
         uses: dependabot/fetch-metadata@v3
         with:
-          github-token: '${{ secrets.GITHUB_TOKEN }}'
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
       - name: Enable auto-merge for Dependabot PRs
         if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-minor' || steps.metadata.outputs.update-type == 'version-update:semver-patch' }}
         run: gh pr merge --auto --squash "$PR_URL"

@@ -1,23 +1,23 @@
 version: 2
 updates:
-- package-ecosystem: npm
-  directory: "/"
-  schedule:
-    interval: monthly
-  assignees:
-  - terakoya76
-  groups:
-    # @vitest/* packages declare vitest as a peer at the exact same version;
-    # bumping them in separate PRs fails the coverage step with
-    # "coverageFilesDirectory is required".
-    vitest:
-      patterns:
-      - vitest
-      - "@vitest/*"
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: monthly
+    assignees:
+      - terakoya76
+    groups:
+      # @vitest/* packages declare vitest as a peer at the exact same version;
+      # bumping them in separate PRs fails the coverage step with
+      # "coverageFilesDirectory is required".
+      vitest:
+        patterns:
+          - vitest
+          - "@vitest/*"
 
-- package-ecosystem: github-actions
-  directory: /
-  schedule:
-    interval: monthly
-  assignees:
-    - terakoya76
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    assignees:
+      - terakoya76
