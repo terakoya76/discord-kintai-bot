@@ -1,0 +1,7 @@
+allowBuilds:
+  esbuild: true
+overrides:
+  # request is unmaintained and pins vulnerable versions of these packages
+  request>form-data: ^2.5.6
+  request>qs: ^6.14.1
+  request>tough-cookie: ^4.1.3
