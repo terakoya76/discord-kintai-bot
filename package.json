@@ -32,7 +32,8 @@
   "pnpm": {
     "overrides": {
       "request>form-data": "^2.5.6",
-      "request>qs": "^6.14.1"
+      "request>qs": "^6.14.1",
+      "request>tough-cookie": "^4.1.3"
     }
   }
 }
